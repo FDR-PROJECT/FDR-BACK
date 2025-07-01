@@ -10,7 +10,8 @@ def create_app(config=None) -> Flask:
     CORS(app, origins=[
         "http://futevoleidorafinha.s3-website-us-east-1.amazonaws.com",
         "https://futevoleidorafinha.com.br",
-        "https://www.futevoleidorafinha.com.br"
+        "https://www.futevoleidorafinha.com.br",
+        "https://d2c4x6k8ohsigq.cloudfront.net"
     ], supports_credentials=True)
     if config:
         app.config.from_object(get_config_by_name(config))
