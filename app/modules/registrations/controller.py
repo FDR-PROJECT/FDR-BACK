@@ -86,6 +86,22 @@ class RegistrationsController:
             return {"error": "Pagamento não encontrado para o e-mail informado."}, 404
 
         payment.status = new_status.upper()
+        # 💥 Se o novo status for aprovado, criar a inscrição (se ainda não existir)
+        if payment.status == "APPROVED":
+            existing_registration = Registration.query.filter_by(
+                athlete_id=payment.user_id,
+                event_id=payment.event_id,
+                category_id=payment.category_id
+            ).first()
+
+            if not existing_registration:
+                registration = Registration(
+                    athlete_id=payment.user_id,
+                    event_id=payment.event_id,
+                    category_id=payment.category_id,
+                    partner_id=payment.partner_id
+                )
+                db.session.add(registration)
         db.session.commit()
         return {"message": "Status do pagamento atualizado com sucesso."}, 200
 

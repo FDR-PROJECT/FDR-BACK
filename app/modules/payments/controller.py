@@ -1,6 +1,7 @@
 from decimal import ROUND_HALF_UP, Decimal
 import os
 from flask import jsonify, request
+from sqlalchemy import or_
 import mercadopago
 import requests
 from app.db import db
@@ -26,7 +27,7 @@ class PaymentsController:
         data = request.get_json()
         category_id = data.get("category_id")
         event_id = data.get("event_id")
-        partner_email = data.get("partner_email")
+        partner_identifier = data.get("partner_email")
 
         category = Category.query.get(category_id)
         if not category:
@@ -47,8 +48,10 @@ class PaymentsController:
 
         # Verifica parceiro (se informado)
         partner = None
-        if partner_email:
-            partner = User.query.filter_by(email=partner_email).first()
+        if partner_identifier:
+            partner = User.query.filter(
+                or_(User.email == partner_identifier, User.cpf == partner_identifier)
+            ).first()
             if partner:
                 partner_registered = Registration.query.filter_by(
                     athlete_id=partner.id,

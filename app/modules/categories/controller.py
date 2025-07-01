@@ -84,6 +84,22 @@ class CategoriesController:
 
         db.session.commit()
         return category
+    
+    def delete_category(self, category_id):
+        category = Category.query.get(category_id)
+
+        if not category:
+            return False, "Categoria não encontrada."
+
+        # Verifica se tem inscrições vinculadas
+        registrations = Registration.query.filter_by(category_id=category_id).first()
+        if registrations:
+            return False, "Não é possível deletar categorias com inscrições vinculadas."
+
+        db.session.delete(category)
+        db.session.commit()
+        return True, "Categoria deletada com sucesso."
+
 
 
 

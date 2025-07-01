@@ -31,3 +31,11 @@ def update_category(category_id):
     else:
         return jsonify({"error": "Categoria não encontrada"}), 404
     
+
+@categories_bp.route('/<int:category_id>', methods=['DELETE'])
+def delete_category(category_id):
+    success, message = categories_controller.delete_category(category_id)
+    if success:
+        return jsonify({"message": message}), 200
+    else:
+        return jsonify({"error": message}), 400

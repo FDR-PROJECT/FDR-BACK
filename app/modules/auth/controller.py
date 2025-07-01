@@ -18,6 +18,7 @@ class AuthController:
         user = User(
             name=data['name'],
             email=data['email'],
+            cpf=data['cpf'],
             phone=data['phone'],
             password_hash=hash_password(data['password']),
             role='athlete',
