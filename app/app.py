@@ -7,7 +7,7 @@ from flask_cors import CORS
 def create_app(config=None) -> Flask:
  
     app = Flask(__name__)
-    CORS(app, supports_credentials=True)
+    CORS(app, origins="*", supports_credentials=True)
     if config:
         app.config.from_object(get_config_by_name(config))
 
