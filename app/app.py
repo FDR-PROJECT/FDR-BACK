@@ -7,7 +7,11 @@ from flask_cors import CORS
 def create_app(config=None) -> Flask:
  
     app = Flask(__name__)
-    CORS(app, origins="*", supports_credentials=True)
+    CORS(app, origins=[
+        "http://futevoleidorafinha.s3-website-us-east-1.amazonaws.com",
+        "https://futevoleidorafinha.com.br",
+        "https://www.futevoleidorafinha.com.br"
+    ], supports_credentials=True)
     if config:
         app.config.from_object(get_config_by_name(config))
 
