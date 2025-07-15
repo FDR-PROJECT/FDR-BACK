@@ -6,7 +6,11 @@ from app.db.db import db
 from app.db.models.user import User
 from werkzeug.utils import secure_filename
 from app.db.models.user_terms_acceptance import UserTermsAcceptance
+from app.utils.services.mail import send_email
 from app.utils.services.security import create_jwt_token, hash_password, verify_password
+import random
+from app.db.models.password_reset_code import PasswordResetCode
+
 
 
 # Simples, substitua isso por Redis no futuro
@@ -411,3 +415,46 @@ class AuthController:
         except Exception as e:
             db.session.rollback()
             return jsonify({"error": "Erro ao deletar usuário", "details": str(e)}), 500
+    
+    
+    def send_reset_code(self):
+        data = request.get_json()
+        email = data.get("email")
+
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({"error": "Usuário não encontrado"}), 404
+
+        code = str(random.randint(100000, 999999))
+
+        db.session.add(PasswordResetCode(email=email, code=code))
+        db.session.commit()
+
+        send_email(
+            to=email,
+            subject="Seu código de recuperação",
+            body=f"Use este código para redefinir sua senha: {code} (válido por 5 minutos)"
+        )
+
+        return jsonify({"message": "Código enviado para seu e-mail"}), 200
+    
+    
+    def reset_password(self):
+        data = request.get_json()
+        email = data.get("email")
+        code = data.get("code")
+        new_password = data.get("new_password")
+
+        reset = PasswordResetCode.query.filter_by(email=email, code=code).order_by(PasswordResetCode.created_at.desc()).first()
+
+        if not reset or reset.is_expired():
+            return jsonify({"error": "Código inválido ou expirado"}), 400
+
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({"error": "Usuário não encontrado"}), 404
+
+        user.password_hash = hash_password(new_password)
+        db.session.commit()
+
+        return jsonify({"message": "Senha redefinida com sucesso!"}), 200

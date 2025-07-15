@@ -77,3 +77,12 @@ def get_all_users_full_info():
 def delete_user(user_id):
     return auth_controller.delete_user(user_id)
 
+@auth_bp.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    return auth_controller.send_reset_code()
+
+@auth_bp.route('/reset-password', methods=['POST'])
+def reset_password():
+    return auth_controller.reset_password()
+
+
